@@ -23,12 +23,12 @@ stock_name, window_size, episode_count = sys.argv[1], int(sys.argv[2]), int(sys.
 agent = Agent(window_size)
 data = getStockDataVec(stock_name)
 l = len(data) - 1
-batch_size = 32
+batch_size = 64
 
 for e in range(episode_count + 1):
 	print ("# Episode " + str(e) + "/" + str(episode_count) + "###############################")
 	state = getState(data, 0, window_size + 1)
-
+	end_state = np.random.choice(l)
 	total_profit = 0
 	agent.inventory = []
 
@@ -61,6 +61,9 @@ for e in range(episode_count + 1):
 
 		if len(agent.memory) > batch_size:
 			agent.expReplay(batch_size)
+
+		if l >= end_state:
+			break
 
 	if e % 10 == 0:
 		agent.model.save("models/model_ep" + str(e))
