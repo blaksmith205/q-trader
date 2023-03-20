@@ -41,12 +41,16 @@ class Agent:
 		options = self.model.predict(state)
 		return np.argmax(options[0])
 
-	def expReplay(self, batch_size):
+	def expReplay(self, batch_size, window_size):
 		mini_batch = []
+		states = np.zeros((batch_size, window_size), dtype=float)
+		targets = np.zeros((batch_size, self.action_size), dtype=float)
+
 		l = len(self.memory)
 		for i in range(l - batch_size + 1, l):
 			mini_batch.append(self.memory[i])
 
+		i = 0
 		for state, action, reward, next_state, done in mini_batch:
 			target = reward
 			if not done:
@@ -54,7 +58,11 @@ class Agent:
 
 			target_f = self.model.predict(state)
 			target_f[0][action] = target
-			self.model.fit(state, target_f)
+			states[i] = state
+			targets[i] = target_f
+			i += 1
+
+		self.model.fit(states, targets)
 
 		if self.epsilon > self.epsilon_min:
-			self.epsilon *= self.epsilon_decay 
+			self.epsilon *= self.epsilon_decay

@@ -1,3 +1,5 @@
+import random
+
 from agent.agent import Agent
 from functions import *
 import sys
@@ -28,7 +30,7 @@ batch_size = 64
 for e in range(episode_count + 1):
 	print ("# Episode " + str(e) + "/" + str(episode_count) + "###############################")
 	state = getState(data, 0, window_size + 1)
-	end_state = np.random.choice(l)
+	end_state = random.randrange(512)
 	total_profit = 0
 	agent.inventory = []
 
@@ -49,7 +51,7 @@ for e in range(episode_count + 1):
 			total_profit += data[t] - bought_price
 			print ("Sell: " + formatPrice(data[t]) + " | Profit: " + formatPrice(data[t] - bought_price))
 
-		done = True if t == l - 1 else False
+		done = True if t == end_state else False
 		agent.memory.append((state, action, reward, next_state, done))
 		state = next_state
 
@@ -60,10 +62,9 @@ for e in range(episode_count + 1):
 			print ("")
 
 		if len(agent.memory) > batch_size:
-			agent.expReplay(batch_size)
+			agent.expReplay(batch_size, window_size)
 
-		if l >= end_state:
+		if done:
 			break
-
 	if e % 10 == 0:
 		agent.model.save("models/model_ep" + str(e))
